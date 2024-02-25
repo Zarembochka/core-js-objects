@@ -375,46 +375,43 @@ function group(array, keySelector, valueSelector) {
  */
 
 class CssSelector {
-  constructor(value) {
+  constructor(value, index) {
     this.selector = value.concat('.');
+    this.index = index;
   }
 
   element(value) {
-    if (this.selector.includes('#')) {
-      this.checkOrderSelector('', true);
-    }
-    this.checkSelector(value, true);
+    this.checkUniqueSelector(1);
+    this.selector = this.selector.slice(0, -1).concat(`${value}.`);
+    return this;
   }
 
   id(value) {
-    this.checkSelector('#');
-    this.checkOrderSelector('.');
-    this.checkOrderSelector('::');
+    this.checkUniqueSelector(2);
     this.selector = this.selector.slice(0, -1).concat(`#${value}.`);
     return this;
   }
 
   class(value) {
-    this.checkOrderSelector('[');
+    this.checkOrderSelector(3);
     this.selector = this.selector.slice(0, -1).concat(`.${value}.`);
     return this;
   }
 
   attr(value) {
-    this.checkOrderSelector(':');
+    this.checkOrderSelector(4);
     this.selector = this.selector.slice(0, -1).concat(`[${value}].`);
     return this;
   }
 
   pseudoClass(value) {
-    this.checkOrderSelector('::');
+    this.checkOrderSelector(5);
     this.selector = this.selector.slice(0, -1).concat(`:${value}.`);
     return this;
   }
 
   pseudoElement(value) {
-    this.checkSelector('::');
-    this.checkSelector('::');
+    this.checkUniqueSelector(6);
     this.selector = this.selector.slice(0, -1).concat(`::${value}.`);
     return this;
   }
@@ -423,24 +420,19 @@ class CssSelector {
     return this.selector.slice(0, -1);
   }
 
-  checkSelector(value, flag = false) {
+  checkUniqueSelector(index) {
     const message =
       'Element, id and pseudo-element should not occur more then one time inside the selector';
-    if (flag) {
+    if (this.index === index) {
       throw new Error(message);
     }
-    if (this.selector.includes(value)) {
-      throw new Error(message);
-    }
+    this.checkOrderSelector(index);
   }
 
-  checkOrderSelector(value, flag = false) {
+  checkOrderSelector(index) {
     const message =
       'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element';
-    if (flag) {
-      throw new Error(message);
-    }
-    if (this.selector.slice(0, -1).includes(value)) {
+    if (this.index > index) {
       throw new Error(message);
     }
   }
@@ -448,27 +440,27 @@ class CssSelector {
 
 const cssSelectorBuilder = {
   element(value) {
-    return new CssSelector(value);
+    return new CssSelector(value, 1);
   },
 
   id(value) {
-    return new CssSelector(`#${value}`);
+    return new CssSelector(`#${value}`, 2);
   },
 
   class(value) {
-    return new CssSelector(`.${value}`);
+    return new CssSelector(`.${value}`, 3);
   },
 
   attr(value) {
-    return new CssSelector(`[${value}]`);
+    return new CssSelector(`[${value}]`, 4);
   },
 
   pseudoClass(value) {
-    return new CssSelector(`:${value}`);
+    return new CssSelector(`:${value}`, 5);
   },
 
   pseudoElement(value) {
-    return new CssSelector(`::${value}`);
+    return new CssSelector(`::${value}`, 6);
   },
 
   combine(selector1, combinator, selector2) {
