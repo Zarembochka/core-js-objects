@@ -226,6 +226,26 @@ function fromJSON(proto, json) {
   return obj;
 }
 
+function sortByCountryAndCity(item1, item2) {
+  if (item2.country > item1.country) {
+    return -1;
+  }
+
+  if (item2.country < item1.country) {
+    return 1;
+  }
+
+  if (item2.city > item1.city) {
+    return -1;
+  }
+
+  if (item2.city < item1.city) {
+    return 1;
+  }
+
+  return 0;
+}
+
 /**
  * Sorts the specified array by country name first and city name
  * (if countries are equal) in ascending order.
@@ -252,8 +272,8 @@ function fromJSON(proto, json) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  return arr.sort(sortByCountryAndCity);
 }
 
 /**
